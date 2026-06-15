@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dump Quote">
+<title>Dump Quote</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black:#0f0f0f; --steel:#1c2b3a; --rust:#c0392b; --rust-lt:#e74c3c;
+    --amber:#f39c12; --chalk:#f0ece4; --muted:#8a9ab0; --line:#2c3e50;
+    --green:#27ae60; --card-bg:#162230;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--steel); color:var(--chalk); font-family:'Barlow',sans-serif; min-height:100vh; padding-bottom:40px; }
+  header { background:var(--black); padding:18px 20px 14px; display:flex; align-items:flex-end; gap:12px; border-bottom:3px solid var(--rust); }
+  .logo { width:42px; height:42px; background:var(--rust); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+  header h1 { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:28px; letter-spacing:0.04em; line-height:1; text-transform:uppercase; }
+  header p { font-size:11px; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; margin-top:2px; }
+  main { padding:20px 16px; max-width:480px; margin:0 auto; }
+  .sec { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--rust); margin:24px 0 10px; display:flex; align-items:center; gap:8px; }
+  .sec::after { content:''; flex:1; height:1px; background:var(--line); }
+  label { display:block; font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:5px; margin-top:14px; }
+  input, select { width:100%; background:var(--card-bg); border:1.5px solid var(--line); border-radius:6px; color:var(--chalk); font-family:'Barlow',sans-serif; font-size:16px; padding:12px 14px; outline:none; transition:border-color 0.15s; -webkit-appearance:none; }
+  input:focus, select:focus { border-color:var(--rust); }
+  input::placeholder { color:#4a5a6a; }
+  select option { background:var(--card-bg); }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .btn-main { width:100%; margin-top:24px; padding:16px; background:var(--rust); color:#fff; border:none; border-radius:8px; font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background 0.15s; }
+  .btn-main:active { background:var(--rust-lt); }
+  .btn-main:disabled { background:#3a4a5a; cursor:not-allowed; }
+  .btn-clear { width:100%; margin-top:10px; padding:12px; background:transparent; color:var(--muted); border:1.5px solid var(--line); border-radius:8px; font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer; }
+  #result { display:none; margin-top:28px; }
+  .card { background:var(--black); border-radius:10px; border:2px solid var(--rust); overflow:hidden; }
+  .card-head { background:var(--rust); padding:14px 18px; font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; }
+  .cname { font-size:20px; font-weight:900; margin-top:2px; }
+  .card-body { padding:16px 18px; }
+  .pills { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .pill { background:var(--card-bg); border:1px solid var(--line); border-radius:20px; padding:5px 12px; font-size:12px; color:var(--muted); }
+  .pill b { color:var(--chalk); }
+  .item { display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; border-bottom:1px solid var(--line); font-size:14px; }
+  .item:last-of-type { border-bottom:none; }
+  .ilabel { color:var(--muted); }
+  .ivalue { font-weight:600; font-family:'Barlow Condensed',sans-serif; font-size:16px; }
+  .ivalue.hi { color:var(--amber); }
+  .card-total { padding:16px 18px; background:var(--card-bg); border-top:2px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
+  .tlabel { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
+  .tamt { font-family:'Barlow Condensed',sans-serif; font-size:42px; font-weight:900; color:var(--green); line-height:1; }
+  .note { margin-top:14px; padding:12px 14px; background:#1a2a1a; border-left:3px solid var(--green); border-radius:4px; font-size:12px; color:#7ec87e; line-height:1.5; }
+  .err { margin-top:14px; padding:12px 14px; background:#2a1212; border-left:3px solid var(--rust); border-radius:4px; font-size:13px; color:#e07070; display:none; }
+  .spin { display:inline-block; width:18px; height:18px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .ai-note { margin-top:6px; font-size:11px; color:#4a6a5a; font-style:italic; text-align:center; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🗑</div>
+  <div>
+    <h1>Dump Quote</h1>
+    <p>Pricing Calculator · Christiansburg, VA</p>
+  </div>
+</header>
+<main>
+  <div class="sec">Customer</div>
+  <label>Customer Name</label>
+  <input type="text" id="customerName" placeholder="Jane Smith" autocomplete="off">
+  <label>Delivery Address</label>
+  <input type="text" id="address" placeholder="123 Main St, Roanoke, VA" autocomplete="off">
+
+  <div class="sec">Job Details</div>
+  <div class="row2">
+    <div>
+      <label>Dumpster Size</label>
+      <select id="size">
+        <option value="20">20 Yard — $450</option>
+        <option value="15">15 Yard — $400</option>
+      </select>
+    </div>
+    <div>
+      <label>Rental Days</label>
+      <input type="number" id="days" value="7" min="1" max="90">
+    </div>
+  </div>
+  <label>Est. Tonnage (optional)</label>
+  <input type="number" id="tonnage" placeholder="Leave blank if unknown" step="0.5" min="0">
+
+  <button class="btn-main" id="calcBtn" onclick="calculate()">
+    <span id="btnText">Calculate Quote</span>
+    <span id="btnSpin" class="spin" style="display:none"></span>
+  </button>
+  <button class="btn-clear" onclick="clearForm()">Clear / New Customer</button>
+
+  <div id="result">
+    <div class="card">
+      <div class="card-head">Quote for <div class="cname" id="dName"></div></div>
+      <div class="card-body">
+        <div class="pills">
+          <div class="pill">📍 <b id="dMiles"></b> mi total (4 trips)</div>
+          <div class="pill">⏱ <b id="dTime"></b> drive</div>
+          <div class="pill">🚛 <b id="dFuel"></b> fuel/wear</div>
+        </div>
+        <div class="ai-note">Route estimated by AI · verify for unfamiliar areas</div>
+        <div style="margin-top:16px">
+          <div class="item">
+            <span class="ilabel">Base rental (<span id="dSize"></span>, 7 days, 2 tons)</span>
+            <span class="ivalue" id="dBase"></span>
+          </div>
+          <div class="item" id="rowDays" style="display:none">
+            <span class="ilabel">Extra days (<span id="dExtraDays"></span> @ $25/day)</span>
+            <span class="ivalue hi" id="dExtraCost"></span>
+          </div>
+          <div class="item">
+            <span class="ilabel">Mileage surcharge (<span id="dMilesLine"></span>)</span>
+            <span class="ivalue hi" id="dMileageCost"></span>
+          </div>
+          <div class="item" id="rowOverage" style="display:none">
+            <span class="ilabel">Tonnage overage (<span id="dOverage"></span> tons @ $64)</span>
+            <span class="ivalue hi" id="dOverageCost"></span>
+          </div>
+        </div>
+      </div>
+      <div class="card-total">
+        <div>
+          <div class="tlabel">Quote Total</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">~$300 profit included</div>
+        </div>
+        <div class="tamt" id="dTotal"></div>
+      </div>
+    </div>
+    <div class="note" id="overageNote">
+      💡 <strong>Overage:</strong> Tonnage over 2 tons billed at <strong>$64/ton</strong> after pickup when actual weight is confirmed.
+    </div>
+  </div>
+  <div class="err" id="errMsg"></div>
+</main>
+
+<script>
+const API_KEY = "PASTE_YOUR_API_KEY_HERE";
+const ORIGIN  = "1814 Hazelnut Road, Christiansburg, VA 24073";
+
+async function getRoute(destination) {
+  const prompt = `You are a routing assistant. Estimate the one-way driving distance in miles and one-way driving time in minutes from the origin to the destination using real road routes in Virginia.
+
+Origin: ${ORIGIN}
+Destination: ${destination}
+
+Respond with ONLY valid JSON, no other text:
+{"miles": <number>, "minutes": <number>, "found": true}
+
+If the destination is invalid or unrecognizable respond with:
+{"found": false, "error": "brief reason"}
+
+Use realistic road distances, not straight-line.`;
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": API_KEY,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 200,
+      messages: [{ role: "user", content: prompt }]
+    })
+  });
+
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || "API error");
+  const text  = data.content.filter(b => b.type === "text").map(b => b.text).join("");
+  const clean = text.replace(/```json|```/g, "").trim();
+  const parsed = JSON.parse(clean);
+  if (!parsed.found) throw new Error(parsed.error || "Address not recognized.");
+  return parsed;
+}
+
+function fmt(min) {
+  if (min < 60) return `${min} min`;
+  const h = Math.floor(min/60), m = min%60;
+  return m === 0 ? `${h}h` : `${h}h ${m}m`;
+}
+
+async function calculate() {
+  const name    = document.getElementById('customerName').value.trim();
+  const address = document.getElementById('address').value.trim();
+  const size    = document.getElementById('size').value;
+  const days    = parseInt(document.getElementById('days').value) || 7;
+  const tRaw    = document.getElementById('tonnage').value;
+  const tonnage = tRaw ? parseFloat(tRaw) : null;
+
+  if (!address) { showErr("Please enter a delivery address."); return; }
+
+  document.getElementById('calcBtn').disabled = true;
+  document.getElementById('btnText').textContent = 'Calculating...';
+  document.getElementById('btnSpin').style.display = 'inline-block';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('errMsg').style.display = 'none';
+
+  try {
+    const route = await getRoute(address);
+
+    const totalMiles    = Math.round(route.miles * 4 * 10) / 10;
+    const driveMin      = Math.round(route.minutes);
+    const basePrice     = size === "20" ? 450 : 400;
+    const extraDays     = Math.max(0, days - 7);
+    const extraCost     = extraDays * 25;
+    const billable      = Math.max(0, totalMiles - 20);
+    const mileageCost   = Math.round(billable * 1.00);
+    const fuelCost      = Math.round(totalMiles * 1.00);
+    let overageTons = 0, overageCost = 0;
+    if (tonnage !== null && tonnage > 2) {
+      overageTons = Math.round((tonnage - 2) * 10) / 10;
+      overageCost = Math.round(overageTons * 64);
+    }
+    const total = basePrice + extraCost + mileageCost + overageCost;
+
+    document.getElementById('dName').textContent     = name || address;
+    document.getElementById('dMiles').textContent    = totalMiles;
+    document.getElementById('dTime').textContent     = fmt(driveMin);
+    document.getElementById('dFuel').textContent     = `$${fuelCost}`;
+    document.getElementById('dSize').textContent     = `${size} yd`;
+    document.getElementById('dBase').textContent     = `$${basePrice}`;
+
+    if (billable > 0) {
+      document.getElementById('dMilesLine').textContent   = `${billable.toFixed(1)} billable mi × $1`;
+      document.getElementById('dMileageCost').textContent = `+$${mileageCost}`;
+    } else {
+      document.getElementById('dMilesLine').textContent   = `within free zone`;
+      document.getElementById('dMileageCost').textContent = '$0';
+    }
+
+    if (extraDays > 0) {
+      document.getElementById('rowDays').style.display     = 'flex';
+      document.getElementById('dExtraDays').textContent    = extraDays;
+      document.getElementById('dExtraCost').textContent    = `+$${extraCost}`;
+    } else {
+      document.getElementById('rowDays').style.display = 'none';
+    }
+
+    if (overageCost > 0) {
+      document.getElementById('rowOverage').style.display   = 'flex';
+      document.getElementById('dOverage').textContent       = overageTons;
+      document.getElementById('dOverageCost').textContent   = `+$${overageCost}`;
+      document.getElementById('overageNote').style.display  = 'none';
+    } else {
+      document.getElementById('rowOverage').style.display  = 'none';
+      document.getElementById('overageNote').style.display = 'block';
+    }
+
+    document.getElementById('dTotal').textContent        = `$${total}`;
+    document.getElementById('result').style.display      = 'block';
+    setTimeout(() => document.getElementById('result').scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+
+  } catch(err) {
+    showErr(err.message || "Something went wrong. Check the address and try again.");
+  } finally {
+    document.getElementById('calcBtn').disabled          = false;
+    document.getElementById('btnText').textContent       = 'Calculate Quote';
+    document.getElementById('btnSpin').style.display     = 'none';
+  }
+}
+
+function showErr(msg) {
+  const el = document.getElementById('errMsg');
+  el.textContent = "⚠ " + msg;
+  el.style.display = 'block';
+}
+
+function clearForm() {
+  ['customerName','address','tonnage'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('size').value = '20';
+  document.getElementById('days').value = '7';
+  document.getElementById('result').style.display  = 'none';
+  document.getElementById('errMsg').style.display  = 'none';
+  document.getElementById('customerName').focus();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !document.getElementById('calcBtn').disabled) calculate();
+});
+</script>
+</body>
+</html>
